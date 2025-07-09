@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.mjs";
 import { logger } from "../utils/logger.mjs";
+
 export const authMiddleware = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
 
@@ -69,6 +70,31 @@ export const verifyClubAdmin = (req, res, next) => {
       return res
         .status(403)
         .json({ message: "Access forbidden. Club admins only." });
+    }
+    req.user = decoded;
+    next();
+  } catch (error) {
+    logger.error(error);
+    res.status(400).json({ message: "Invalid token." });
+  }
+};
+
+export const authenticateAdmins = (req, res, next) => {
+  const allowedRoles = ["superadmin", "clubadmin"];
+  const token = req.headers["authorization"]?.split(" ")[1];
+
+  if (!token) {
+    logger.error(`Access denied`);
+    return res
+      .status(401)
+      .json({ message: "Access denied. No token provided." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, env.JWT_SECRET);
+    if (!decoded || !allowedRoles.includes(decoded.role)) {
+      logger.error(`Access denied`);
+      return res.status(403).json({ message: "Access forbidden. Users only." });
     }
     req.user = decoded;
     next();
