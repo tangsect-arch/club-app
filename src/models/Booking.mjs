@@ -14,7 +14,8 @@ const BookingTableSchema = new mongoose.Schema({
   seatCount: {
     type: Number,
     required: true,
-    maxLimit: 5,
+    min: [1, "Minimum 1 seat must be booked"],
+    max: [5, "Maximum 5 seats can be booked per user"],
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,

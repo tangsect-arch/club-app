@@ -14,10 +14,10 @@ const UserSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      lowercase: true,
       validate: {
-        validator: function (v) {
-          return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v);
-        },
+        validator: (v) =>
+          /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v),
         message: (props) => `${props.value} is not a valid email address!`,
       },
     },
@@ -35,9 +35,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
       unique: true,
       validate: {
-        validator: function (v) {
-          return /^\d{10}$/.test(v); // exactly 10 digits
-        },
+        validator: (v) => /^\d{10}$/.test(v),
         message: (props) =>
           `${props.value} is not a valid 10-digit phone number!`,
       },
@@ -68,6 +66,7 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
+// Encrypt password before saving
 UserSchema.pre("save", function (next) {
   if (this.isModified("password")) {
     this.password = bcrypt.hashSync(this.password, 10);
@@ -75,14 +74,17 @@ UserSchema.pre("save", function (next) {
   next();
 });
 
+// Compare password method
 UserSchema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
-// UserSchema.virtual("dobFormatted").get(function () {
-//   return this.dob.toISOString().split("T")[0];
-// });
+// Virtual: formatted DOB (YYYY-MM-DD)
+UserSchema.virtual("dobFormatted").get(function () {
+  return this.dob.toISOString().split("T")[0];
+});
 
+// Virtual: age
 UserSchema.virtual("age").get(function () {
   const today = new Date();
   const birthDate = new Date(this.dob);

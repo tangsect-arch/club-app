@@ -1,5 +1,12 @@
+import fs from "fs";
+import path from "path";
 import winston from "winston";
 import { env } from "../config/env.mjs";
+
+const logDir = "logs";
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
 
 const levels = {
   error: 0,
@@ -9,9 +16,7 @@ const levels = {
   debug: 4,
 };
 
-const level = () => {
-  return env === "development" ? "debug" : "warn";
-};
+const level = () => (env === "development" ? "debug" : "warn");
 
 const colors = {
   error: "red",
@@ -20,24 +25,28 @@ const colors = {
   http: "magenta",
   debug: "white",
 };
-
 winston.addColors(colors);
 
-const format = winston.format.combine(
-  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
-  winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`
-  )
-);
+const format =
+  env === "production"
+    ? winston.format.json()
+    : winston.format.combine(
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
+        winston.format.colorize({ all: true }),
+        winston.format.printf(
+          (info) => `${info.timestamp} ${info.level}: ${info.message}`
+        )
+      );
 
 const transports = [
   new winston.transports.Console(),
   new winston.transports.File({
-    filename: "logs/error.log",
+    filename: path.join(logDir, "error.log"),
     level: "error",
   }),
-  new winston.transports.File({ filename: "logs/all.log" }),
+  new winston.transports.File({
+    filename: path.join(logDir, "all.log"),
+  }),
 ];
 
 export const logger = winston.createLogger({
@@ -45,9 +54,17 @@ export const logger = winston.createLogger({
   levels,
   format,
   transports,
+  exitOnError: false,
 });
 
-// Morgan configuration
+logger.exceptions.handle(
+  new winston.transports.File({ filename: path.join(logDir, "exceptions.log") })
+);
+
+process.on("unhandledRejection", (ex) => {
+  throw ex;
+});
+
 export const morganConfig = {
   format: ":method :url :status :res[content-length] - :response-time ms",
   stream: {

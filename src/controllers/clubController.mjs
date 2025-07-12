@@ -1,125 +1,87 @@
-import Club from "../models/Club.mjs";
+import {
+  createClubService,
+  fetchClubsService,
+  fetchClubByIdService,
+  updateClubService,
+  deleteClubService,
+} from "../service/clubService.mjs";
 
-export const createClub = async (req, res) => {
+import { successResponse } from "../utils/responseBuilder.mjs";
+import { logger } from "../utils/logger.mjs";
+
+export const createClub = async (req, res, next) => {
   try {
-    const { clubName, location, description } = req.body;
-    const newClub = new Club({
-      clubName,
-      location,
-      description,
-    });
-
-    await newClub.save().catch((error) => {
-      if (error.code === 11000) {
-        return res.status(400).json({
-          success: false,
-          message: "Club with the same name already exists.",
-        });
-      }
-    });
-
-    res
-      .status(201)
-      .json({ success: true, message: "Club created successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-export const fetchClubs = async (req, res) => {
-  try {
-    const { page = 1, limit = 10 } = req.query;
-    const skip = (page - 1) * limit;
-
-    const clubs = await Club.find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
-
-    const totalClubs = await Club.countDocuments();
-
-    if (totalClubs === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No clubs found" });
-    }
-
-    res.status(200).json({
-      success: true,
-      clubs,
-      totalPages: Math.ceil(totalClubs / limit),
-      currentPage: page,
+    const club = await createClubService(req.body);
+    return successResponse({
+      res,
+      statusCode: 201,
+      message: "Club created successfully",
+      data: club,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    logger.error(error);
+    next(error);
   }
 };
 
-export const fetchClubById = async (req, res) => {
+export const fetchClubs = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const club = await Club.findById(id);
+    const { page, limit } = req.query;
+    const result = await fetchClubsService({ page, limit });
 
-    if (!club) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Club not found" });
-    }
-
-    res.status(200).json({ success: true, club });
+    return successResponse({
+      res,
+      message: "Clubs fetched successfully",
+      data: result.clubs,
+      meta: {
+        totalPages: result.totalPages,
+        currentPage: result.currentPage,
+      },
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    logger.error(error);
+    next(error);
   }
 };
 
-export const updateClub = async (req, res) => {
+export const fetchClubById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { clubName, location, description } = req.body;
-
-    const updatedClub = await Club.findByIdAndUpdate(
-      id,
-      { clubName, location, description },
-      { new: true }
-    );
-
-    if (!updatedClub) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Club not found" });
-    }
-
-    res.status(200).json({ success: true, updatedClub });
+    const club = await fetchClubByIdService(req.params.id);
+    return successResponse({
+      res,
+      message: "Club fetched successfully",
+      data: club,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    logger.error(error);
+    next(error);
   }
 };
 
-export const deleteClub = async (req, res) => {
+export const updateClub = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const deletedClub = await Club.findByIdAndUpdate(
-      id,
-      { isDeleted: true },
-      { new: true }
-    );
-
-    deletedClub.save();
-    if (!deletedClub) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Club not found" });
-    }
-
-    res
-      .status(200)
-      .json({ success: true, message: "Club deleted successfully" });
+    const club = await updateClubService(req.params.id, req.body);
+    return successResponse({
+      res,
+      message: "Club updated successfully",
+      data: club,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    logger.error(error);
+    next(error);
+  }
+};
+
+export const deleteClub = async (req, res, next) => {
+  try {
+    const club = await deleteClubService(req.params.id);
+    return successResponse({
+      res,
+      message: "Club deleted successfully",
+      data: club,
+    });
+  } catch (error) {
+    logger.error(error);
+    next(error);
   }
 };

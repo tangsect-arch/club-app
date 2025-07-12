@@ -11,6 +11,7 @@ import { logger } from "./src/utils/logger.mjs";
       logger.info(`http://localhost:${env.PORT}`);
     });
   } catch (error) {
+    logger.error("Failed to start server:", error);
     process.exit(1);
   }
 })();

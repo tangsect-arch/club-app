@@ -27,7 +27,7 @@ export const test_env = {
   PASSWORD_SALT_ROUNDS: parseInt(process.env.PASSWORD_SALT_ROUNDS, 10) || 10,
 };
 
-export const corsConfifg = {
+export const corsConfig = {
   origin: process.env.CORS_ORIGIN || "*",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
