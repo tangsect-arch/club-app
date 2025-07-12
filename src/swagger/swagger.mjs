@@ -2,13 +2,13 @@ import swaggerJSDoc from "swagger-jsdoc";
 import { default as swaggerAutogen } from "mongoose-to-swagger";
 import User from "../models/User.mjs";
 import Club from "../models/Club.mjs";
-import Event from "../models/Event.mjs"; // ✅ Correct import
+import Event from "../models/Event.mjs";
 import Booking from "../models/Booking.mjs";
 import { env } from "../config/env.mjs";
 
 const userSchema = swaggerAutogen(User);
-const clubSchema = swaggerAutogen(Club); // ✅ Club schema
-const eventSchema = swaggerAutogen(Event); // ✅ Event schema
+const clubSchema = swaggerAutogen(Club);
+const eventSchema = swaggerAutogen(Event);
 const bookingSchema = swaggerAutogen(Booking);
 
 const options = {
@@ -41,7 +41,7 @@ const options = {
       },
     ],
   },
-  apis: ["./src/routes/*.mjs"], // Ensure this path is correct
+  apis: ["./src/routes/*.mjs"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
