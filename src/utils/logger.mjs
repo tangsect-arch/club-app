@@ -1,0 +1,73 @@
+import fs from "fs";
+import path from "path";
+import winston from "winston";
+import { env } from "../config/env.mjs";
+
+const logDir = "logs";
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
+
+const levels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  debug: 4,
+};
+
+const level = () => (env === "development" ? "debug" : "warn");
+
+const colors = {
+  error: "red",
+  warn: "yellow",
+  info: "green",
+  http: "magenta",
+  debug: "white",
+};
+winston.addColors(colors);
+
+const format =
+  env === "production"
+    ? winston.format.json()
+    : winston.format.combine(
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
+        winston.format.colorize({ all: true }),
+        winston.format.printf(
+          (info) => `${info.timestamp} ${info.level}: ${info.message}`
+        )
+      );
+
+const transports = [
+  new winston.transports.Console(),
+  new winston.transports.File({
+    filename: path.join(logDir, "error.log"),
+    level: "error",
+  }),
+  new winston.transports.File({
+    filename: path.join(logDir, "all.log"),
+  }),
+];
+
+export const logger = winston.createLogger({
+  level: level(),
+  levels,
+  format,
+  transports,
+  exitOnError: false,
+});
+
+logger.exceptions.handle(
+  new winston.transports.File({ filename: path.join(logDir, "exceptions.log") })
+);
+
+process.on("unhandledRejection", (ex) => {
+  throw ex;
+});
+
+export const morganConfig = {
+  format: ":method :url :status :res[content-length] - :response-time ms",
+  stream: {
+    write: (message) => logger.http(message.trim()),
+  },
+};
