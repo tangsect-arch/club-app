@@ -1,12 +1,10 @@
 import express from "express";
 import {
   createEvent,
-  createEventSeating,
   deleteEvent,
   fetchEvents,
-  fetchEventById,
+  fetchEventByEventId,
   updateEvent,
-  updateEventSeating,
 } from "../controllers/eventController.mjs";
 
 const router = express.Router();
@@ -84,7 +82,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /admin/event:
+ * /api/v1/admin/event:
  *   get:
  *     summary: Fetch all events
  *     tags: [Admin Events]
@@ -110,13 +108,35 @@ const router = express.Router();
  *       500:
  *         description: Server error
  *
- * /admin/event/{id}:
+ * /api/v1/admin/event/{eventId}:
+ *   get:
+ *     summary: fetch an event
+ *     tags: [Admin Events]
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Event'
+ *     responses:
+ *       200:
+ *         description: Event fetched
+ *       404:
+ *         description: Event not found
+ *       500:
+ *         description: Server error
  *   put:
  *     summary: Update an event
  *     tags: [Admin Events]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: eventId
  *         required: true
  *         schema:
  *           type: string
@@ -138,7 +158,7 @@ const router = express.Router();
  *     tags: [Admin Events]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: eventId
  *         required: true
  *         schema:
  *           type: string
@@ -154,8 +174,9 @@ const router = express.Router();
 
 router
   .get("/event", fetchEvents)
+  .get("/event/:eventId", fetchEventByEventId)
   .post("/event", createEvent)
-  .put("/event/:id", updateEvent)
-  .delete("/event/:id", deleteEvent);
+  .put("/event/:eventId", updateEvent)
+  .delete("/event/:eventId", deleteEvent);
 
 export default router;

@@ -130,3 +130,33 @@ export const cancelBookingService = async (userId, bookingId) => {
 
   return booking;
 };
+
+export const fetchBookingsServiceByUserId = async (
+  userId,
+  page = 1,
+  limit = 10
+) => {
+  try {
+    const skip = (page - 1) * limit;
+
+    const [bookings, totalRecords] = await Promise.all([
+      Booking.find({ userId })
+        .populate("eventId", "eventName eventStartDate eventEndDate city")
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean(),
+      Booking.countDocuments({ userId }),
+    ]);
+
+    return {
+      bookings,
+      totalRecords,
+      currentPage: page,
+      totalPages: Math.ceil(totalRecords / limit),
+    };
+  } catch (error) {
+    logger.error("Error in fetchBookingsServiceByUserId:", error);
+    throw error;
+  }
+};

@@ -21,7 +21,7 @@ export const fetchClubsService = async ({ page = 1, limit = 10 }) => {
 
   const [clubs, total] = await Promise.all([
     Club.find()
-      .populate("clubAdmin", "name email")
+      // .populate("clubAdmin", "name email")
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }),
@@ -36,7 +36,7 @@ export const fetchClubsService = async ({ page = 1, limit = 10 }) => {
 };
 
 export const fetchClubByIdService = async (id) => {
-  const club = await Club.findById(id).populate("clubAdmin", "name email");
+  const club = await Club.findById(id); //.populate("clubAdmin", "name email");
   if (!club) {
     const error = new Error("Club not found");
     error.statusCode = 404;
@@ -49,7 +49,7 @@ export const updateClubService = async (id, data) => {
   const club = await Club.findByIdAndUpdate(id, data, {
     new: true,
     runValidators: true,
-  }).populate("clubAdmin", "name email");
+  }); //.populate("clubAdmin", "name email");
 
   if (!club) {
     const error = new Error("Club not found");

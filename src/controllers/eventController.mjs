@@ -43,9 +43,9 @@ export const fetchEvents = async (req, res, next) => {
   }
 };
 
-export const fetchEventById = async (req, res, next) => {
+export const fetchEventByEventId = async (req, res, next) => {
   try {
-    const event = await fetchEventByIdService(req.params.id);
+    const event = await fetchEventByIdService(req.params.eventId);
     return successResponse({
       res,
       message: "Event fetched successfully",
@@ -92,7 +92,7 @@ export const fetchEventByClubIdAndEventId = async (req, res, next) => {
 
 export const updateEvent = async (req, res, next) => {
   try {
-    const event = await updateEventService(req.params.id, req.body);
+    const event = await updateEventService(req.params.eventId, req.body);
     return successResponse({
       res,
       message: "Event updated successfully",
@@ -106,7 +106,7 @@ export const updateEvent = async (req, res, next) => {
 
 export const deleteEvent = async (req, res, next) => {
   try {
-    const event = await deleteEventService(req.params.id);
+    const event = await deleteEventService(req.params.eventId);
     return successResponse({
       res,
       message: "Event deleted successfully",

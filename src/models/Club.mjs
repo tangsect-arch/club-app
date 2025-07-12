@@ -101,6 +101,7 @@ const ClubTableSchema = new mongoose.Schema({
   parentClub: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Club",
+    required: false,
   },
 });
 

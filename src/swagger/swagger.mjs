@@ -17,7 +17,7 @@ const options = {
     info: {
       title: "Club Booking API",
       version: "1.0.0",
-      description: "API docs for login, register, event, and booking",
+      description: "API docs for login, register, club, event and booking",
     },
     servers: [{ url: `http://localhost:${env.PORT}` }],
     components: {

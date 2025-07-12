@@ -2,8 +2,8 @@ import express from "express";
 import {
   fetchEventByClubIdAndEventId,
   fetchEventsByClubId,
-  fetchEventById,
   fetchEvents,
+  fetchEventByEventId,
 } from "../controllers/eventController.mjs";
 import { fetchClubById, fetchClubs } from "../controllers/clubController.mjs";
 
@@ -25,7 +25,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /common/clubs:
+ * /api/v1/common/clubs:
  *   get:
  *     summary: Get all clubs
  *     tags: [Clubs]
@@ -49,7 +49,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /common/clubs/{id}:
+ * /api/v1/common/clubs/{id}:
  *   get:
  *     summary: Get a specific club by ID
  *     tags: [Clubs]
@@ -71,7 +71,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /common/events:
+ * /api/v1/common/events:
  *   get:
  *     summary: Get all events with optional filters and pagination
  *     tags: [Events]
@@ -119,7 +119,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /common/events/{eventId}:
+ * /api/v1/common/events/{eventId}:
  *   get:
  *     summary: Get a specific event by event ID
  *     tags: [Events]
@@ -141,7 +141,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /common/clubs/{id}/events:
+ * /api/v1/common/clubs/{id}/events:
  *   get:
  *     summary: Get all events for a specific club with filters and pagination
  *     tags: [Clubs]
@@ -195,7 +195,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /common/clubs/{id}/events/{eventId}:
+ * /api/v1/common/clubs/{id}/events/{eventId}:
  *   get:
  *     summary: Get specific event details for a club
  *     tags: [Clubs]
@@ -226,6 +226,6 @@ router.get("/clubs/:id", fetchClubById);
 router.get("/clubs/:id/events", fetchEventsByClubId);
 router.get("/clubs/:id/events/:eventId", fetchEventByClubIdAndEventId);
 router.get("/events", fetchEvents);
-router.get("/events/:eventId", fetchEventById);
+router.get("/events/:eventId", fetchEventByEventId);
 
 export default router;

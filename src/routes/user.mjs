@@ -2,10 +2,9 @@ import express from "express";
 import {
   createBooking,
   cancelBooking,
-  fetchBookingById,
-  fetchBookings,
   updateBooking,
-} from "../controllers/userController.mjs";
+  fetchBookingsByUserId,
+} from "../controllers/bookingController.mjs";
 
 const router = express.Router();
 
@@ -18,7 +17,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /user/bookings:
+ * /api/v1/user/bookings:
  *   get:
  *     summary: Get all bookings for the logged-in user
  *     tags: [User Bookings]
@@ -44,7 +43,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /user/bookings/{id}:
+ * /api/v1/user/bookings/{id}:
  *   get:
  *     summary: Get a specific booking by ID
  *     tags: [User Bookings]
@@ -68,7 +67,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /user/event/{id}/booking:
+ * /api/v1/user/event/{id}/booking:
  *   post:
  *     summary: Create a new booking for an event
  *     tags: [User Bookings]
@@ -105,7 +104,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /user/event/{id}/booking/{bookingId}:
+ * /api/v1/user/event/{id}/booking/{bookingId}:
  *   put:
  *     summary: Update seat count for a booking
  *     tags: [User Bookings]
@@ -147,7 +146,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /user/event/{id}/booking/{bookingId}:
+ * /api/v1/user/event/{id}/booking/{bookingId}:
  *   patch:
  *     summary: Cancel a booking
  *     tags: [User Bookings]
@@ -178,8 +177,7 @@ const router = express.Router();
  */
 
 router
-  .get("/bookings", fetchBookings)
-  .get("/bookings/:id", fetchBookingById)
+  .get("/bookings", fetchBookingsByUserId)
   .post("/event/:id/booking", createBooking)
   .put("/event/:id/booking/:bookingId", updateBooking)
   .patch("/event/:id/booking/:bookingId", cancelBooking);
