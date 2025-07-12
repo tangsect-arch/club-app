@@ -1,3 +1,6 @@
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+
 import request from "supertest";
 import app from "../../app.mjs";
 import User from "../models/User.mjs";
@@ -7,96 +10,132 @@ import Booking from "../models/Booking.mjs";
 
 const now = new Date();
 
+const hashedPassword =
+  "$2b$10$2/iipf18qpABNpMNv59lZeobdZWz5CNEeZT5icU135G0wjRXy4uQu";
+
 export const dbInserts = async () => {
-  const userId = "685d3ae2b99c6d851425619d";
-  const adminId = "685d3ae2b99c6d851425619c";
-  const users = await User.insertMany([
+  const password = hashedPassword;
+  const superAdminId = new mongoose.Types.ObjectId();
+  const clubAdminId = new mongoose.Types.ObjectId();
+  const userId = new mongoose.Types.ObjectId();
+
+  const userInsert = await User.insertMany([
     {
-      _id: adminId,
-      username: "testadmin",
-      password: "$2b$10$2/iipf18qpABNpMNv59lZeobdZWz5CNEeZT5icU135G0wjRXy4uQu",
-      role: "admin",
-      email: "testadmin@mail.com",
-      name: "Test Admin",
+      _id: superAdminId,
+      username: "dummysuperadmin",
+      email: "dummysuperadmin@mail.com",
+      password,
+      name: "Super Admin",
+      phone: "0000000001",
+      dob: new Date("1985-01-01"),
+      role: "superadmin",
+    },
+    {
+      _id: clubAdminId,
+      username: "dummyclubadmin",
+      email: "dummyclubadmin@mail.com",
+      password,
+      name: "Club Admin",
+      phone: "0000000002",
+      dob: new Date("1987-05-10"),
+      role: "clubadmin",
     },
     {
       _id: userId,
-      username: "testuser",
-      password: "$2b$10$2/iipf18qpABNpMNv59lZeobdZWz5CNEeZT5icU135G0wjRXy4uQu",
+      username: "dummyuser1",
+      email: "dummyuser1@mail.com",
+      password,
+      name: "Regular User",
+      phone: "0000000003",
+      dob: new Date("1995-07-15"),
       role: "user",
-      email: "testuser@mail.com",
-      name: "Test Admin",
     },
   ]);
 
-  const event = await Club.insertMany([
-    {
-      _id: "685d3ae2b99c6d85142561a0",
-      eventName: "Music Fest " + now.getTime(),
-      eventDate: new Date("2026-10-01"),
-      location: "Chennai",
-      description: "A big music festival",
-    },
-    {
-      _id: "685d3ae2b99c6d85142561a1",
-      eventName: "Tech Conference " + (now.getTime() + 1),
-      eventDate: new Date("2026-10-01"),
-      location: "Bangalore",
-      description: "Annual tech meetup",
-    },
-    {
-      _id: "685d3ae2b99c6d85142561a2",
-      eventName: "Art Show " + (now.getTime() + 2),
-      eventDate: new Date("2026-10-01"),
-      location: "Delhi",
-      description: "Exhibition of modern art",
-    },
-    {
-      _id: "685d3ae2b99c6d85142561a3",
-      eventName: "my new event " + now.getTime(),
-      eventDate: new Date("2026-10-01"),
-      location: "Hyderabad",
-      description: "test description",
-    },
-  ]);
+  const clubs = await Club.insertMany(
+    ["Chennai Club", "Bangalore Club", "Delhi Club"].map((name, i) => ({
+      clubName: name,
+      clubType: "social",
+      contactNumber: `900000000${i}`,
+      email: `club${i}@mail.com`,
+      addressLine1: `Street ${i}`,
+      addressLine2: `Area ${i}`,
+      city: name.split(" ")[0],
+      state: "State",
+      country: "India",
+      postalCode: "60000" + i,
+      status: "active",
+      description: `${name} Description`,
+      website: `https://www.${name.toLowerCase().replace(" ", "")}.com`,
+      clubAdmin: clubAdminId,
+    }))
+  );
 
-  const eventId = event[1]._id;
+  const now = new Date();
+  const events = [];
 
-  const eventSeatingId = await ClubEvent.insertMany([
-    {
-      eventId: event[1]._id,
-      seatingName: "VIP Section",
-      seatingType: "VIP",
-      seatCapacity: 100,
-      remainingSeats: 100,
-      pricePerSeat: 1500,
-    },
-    {
-      _id: "685d3ae2b99c6d85142561a7",
-      eventId: event[1]._id,
-      seatingName: "Regular Section",
-      seatingType: "Regular",
-      seatCapacity: 200,
-      pricePerSeat: 1000,
-      remainingSeats: 100,
-    },
-    {
-      _id: "685d486f3baa2201b1d4e1b5",
-      eventId: event[1]._id,
-      seatingName: "Economy Section",
-      seatingType: "Economy",
-      seatCapacity: 300,
-      pricePerSeat: 500,
-      remainingSeats: 100,
-    },
-  ]);
+  clubs.forEach((club, index) => {
+    const baseDate = new Date(now);
+    baseDate.setDate(baseDate.getDate() + 7 * index);
 
-  const eventBookingId = await Booking.insertMany([
+    const firstStart = new Date(baseDate);
+    const firstEnd = new Date(baseDate);
+    firstEnd.setDate(firstEnd.getDate() + 2);
+
+    const secondStart = new Date(firstEnd);
+    secondStart.setDate(secondStart.getDate() + 5);
+    const secondEnd = new Date(secondStart);
+    secondEnd.setDate(secondEnd.getDate() + 2);
+
+    events.push(
+      {
+        eventName: `Event A - ${club.clubName}`,
+        eventStartDate: firstStart,
+        eventEndDate: firstEnd,
+        startTime: "10:00",
+        duration: 4,
+        address: club.addressLine1,
+        city: club.city,
+        description: "Event A description",
+        seatCount: 100,
+        availableSeats: 90,
+        bookedSeats: 10,
+        amountPerSeat: 200,
+        maxBookingPerUser: 5,
+        clubId: club._id,
+      },
+      {
+        eventName: `Event B - ${club.clubName}`,
+        eventStartDate: secondStart,
+        eventEndDate: secondEnd,
+        startTime: "14:00",
+        duration: 4,
+        address: club.addressLine1,
+        city: club.city,
+        description: "Event B description",
+        seatCount: 150,
+        availableSeats: 145,
+        bookedSeats: 5,
+        amountPerSeat: 250,
+        maxBookingPerUser: 3,
+        clubId: club._id,
+      }
+    );
+  });
+
+  const insertedEvents = await Event.insertMany(events);
+
+  const booking = await Booking.insertMany([
     {
-      eventId: event[1]._id,
-      eventSeatingId: eventSeatingId[1]._id,
+      eventId: insertedEvents[0]._id,
       seatCount: 2,
-      userId: userId,
+      userId,
+      status: "confirmed",
+    },
+    {
+      eventId: insertedEvents[1]._id,
+      seatCount: 3,
+      userId,
       status: "confirmed",
     },
   ]);
@@ -107,25 +146,4 @@ export const loginAndGetToken = async ({ username, password }) => {
     .post("/api/v1/auth/login")
     .send({ username, password });
   return await res.body.token;
-};
-
-export const eventAndSeating = async ({ username, password }) => {
-  const res = await request(app)
-    .post("/api/v1/auth/login")
-    .send({ username, password });
-
-  return await res.body.token;
-};
-
-export const getEventAndBookingIds = async () => {
-  const eventBooking = await Booking.findOne({}).sort({ createdAt: -1 }).lean();
-
-  if (!eventBooking) {
-    throw new Error("No event booking found in the database");
-  }
-
-  const eventId = eventBooking.eventId;
-  const eventBookingId = eventBooking._id;
-
-  return { eventId, eventBookingId };
 };

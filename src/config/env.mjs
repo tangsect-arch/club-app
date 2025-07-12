@@ -20,7 +20,7 @@ export const env = {
 
 export const test_env = {
   PORT: process.env.PORT,
-  DB_URL: "mongodb://localhost:27017/jest-test",
+  DB_URL: "mongodb://localhost:27017/jest-club-test",
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRATION: process.env.JWT_EXPIRATION || "1h",
   NODE_ENV: process.env.NODE_ENV || "dev",

@@ -22,7 +22,7 @@ export const validateFields = (fields) => {
   let errorMessages = [];
   if (!fields) {
     logger.error("Fields are required");
-    return { success: false, message: "Fields are required" };
+    return { status: 400, success: false, message: "Fields are required" };
   }
   const { username, email, password, name, phone, dob, role = "user" } = fields;
   if (!username || !email || !password || !name || !phone || !dob || !role) {
@@ -65,6 +65,6 @@ export const validateFields = (fields) => {
   }
 
   return errorMessages.length > 0
-    ? { success: false, message: errorMessages.join(", ") }
-    : { success: true, message: "Validation successful" };
+    ? { status: 400, success: false, message: errorMessages.join(", ") }
+    : { status: 400, success: true, message: "Validation successful" };
 };

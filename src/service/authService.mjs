@@ -15,7 +15,9 @@ export const createUserService = async (userData) => {
 
   const validation = validateFields(userData);
   if (!validation.success) {
-    throw new Error(validation.message);
+    const error = new Error(validation.message);
+    error.statusCode = 400;
+    throw error;
   }
 
   const formattedDob = formatDate(dob);
@@ -34,8 +36,11 @@ export const createUserService = async (userData) => {
     await newUser.save();
   } catch (error) {
     if (error.code === 11000) {
-      throw new Error("Duplicate entry");
+      const err = new Error("Duplicate entry");
+      err.statusCode = 400;
+      throw err;
     }
+    error.statusCode = 500;
     throw error;
   }
 
@@ -53,12 +58,16 @@ export const loginService = async (loginData) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
   }
 
   const isMatch = user.comparePassword(password);
   if (!isMatch) {
-    throw new Error("Invalid password");
+    const error = new Error("Invalid password");
+    error.statusCode = 401; // Unauthorized
+    throw error;
   }
 
   const token = generateToken(user);
